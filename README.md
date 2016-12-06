@@ -20,7 +20,7 @@
 
 ######After installation login to your Linux via ssh. 
 
-#####Update chache and packages:
+#####Update cache and packages:
 ```sh
 [root@cos7box ~]# yum makecache fast
 [root@cos7box ~]# yum update -y
