@@ -1,6 +1,6 @@
-#Before read this document you must install and configure your Fedora24 desktop with vagrant and ansible.
+##Before read this document you must install and configure your Fedora24 desktop with vagrant and ansible.
 
-##This document explain how to install and configure vagrant to use Vmware Vcenter. Firstly we must install and configure our virtual environment. I have 2 ESXI servers worked with clustered storage from FC storage.
+###This document explain how to install and configure vagrant to use Vmware Vcenter. Firstly we must install and configure our virtual environment. I have 2 ESXI servers worked with clustered storage from FC storage.
 
 #####The configuration of vCenter as following:
 ![Vcenter Structure](images/vcenter-structure.png)
@@ -101,7 +101,7 @@ vagrant ALL=(ALL) NOPASSWD:ALL
 ![Convert to Template](images/create-template.png)
 
 
-#Install and configure vagrant with ansible to the Fedora desktop
+##Install and configure vagrant with ansible to the Fedora desktop
 #####Create folder for our Vagrantfile and go this folder:
 ```sh
 [jshahverdiev@cons2 ~]$ mkdir vsphere ; cd vsphere/
