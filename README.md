@@ -102,7 +102,7 @@ vagrant ALL=(ALL) NOPASSWD:ALL
 ![Convert to Template](images/create-template.png)
 
 
-#Fedora desktop and install and configure vagrant with ansible
+#Install and configure vagrant with ansible to the Fedora desktop
 #####Create folder for our Vagrantfile and go this folder:
 ```sh
 [jshahverdiev@cons2 ~]$ mkdir vsphere ; cd vsphere/
