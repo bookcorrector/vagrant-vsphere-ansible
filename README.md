@@ -6,8 +6,7 @@
 ![Vcenter Structure](images/vcenter-structure.png)
 
 #####ESXI severs:
-10.50.94.8
-10.50.94.9
+10.50.94.8, 10.50.94.9
 
 #####Vcenter server:
 10.50.94.10
