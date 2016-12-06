@@ -1,21 +1,119 @@
-Before read this document you must install and configure your Fedora24 desktop with vagrant and ansible.
+#Before read this document you must install and configure your Fedora24 desktop with vagrant and ansible.
 
-This document explain how to install and configure vagrant to use Vmware Vcenter. Firstly we must install and configure our virtual environment. I have 2 ESXI servers worked with clustered storage from FC storage.
+##This document explain how to install and configure vagrant to use Vmware Vcenter. Firstly we must install and configure our virtual environment. I have 2 ESXI servers worked with clustered storage from FC storage.
 
 #####The configuration of vCenter as following:
 ![Vcenter Structure](images/vcenter-structure.png)
 
-Create folder for our Vagrantfile and go this folder:
+#####ESXI severs:
+10.50.94.8
+10.50.94.9
+
+#####Vcenter server:
+10.50.94.10
+
+#####dev is the resource pool. The name Cluster will be used in our Vagrantfile. Right click on the Cluster(or Ctrl+O) and choose New Resource Pool. Select as default and write name is dev.
+![Create Resource Pool](images/create-resource-pool.png)
+
+#####Right click on the dev resource pool and select New Virtual Machine (or Ctrl+N). Configure new virtual machine with you need and as operation system select CentOS7. Give name of virtual machine cos7box. Remove floppy device and select vlan for your network card in the DHCP subnet. Install your operation system as default with minimal installation. Set hostname cos7box and configure network card to start when system up. Disable IPv6. Set root password to vagrant.
+![Linux Netcard on StartUP](images/linux-network-card-startup.png)
+
+######After installation login to your Linux via ssh. 
+
+#####Update chache and packages:
+```sh
+[root@cos7box ~]# yum makecache fast
+[root@cos7box ~]# yum update -y
+```
+
+#####Disable Selinux, firewalld and do reboot your template system:
+```sh
+[root@cos7box ~]# sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+[root@cos7box ~]# systemctl disable firewalld
+[root@cos7box ~]# reboot
+```
+#####Install perl and needed packages because vmware-tools will be require:
+```sh
+[root@cos7box ~]# yum -y install perl net-tools bind-utils
+```
+######Install vmware-tools. In the console of virtual machine select VM -> Guest -> Install/Upgrade Vmware Tools 
+
+#####In the Linux console mount cdrom and install vmware-tools:
+```sh
+[root@cos7box ~]# mount /dev/cdrom /media/
+mount: /dev/sr0 is write-protected, mounting read-only
+[root@cos7box ~]# cp /media/VMwareTools-10.0.0-3000743.tar.gz /root/
+[root@cos7box ~]# cd /root/; tar zxf VMwareTools-10.0.0-3000743.tar.gz ; cd vmware-tools-distrib/
+```
+
+#####Answer the first question yes and select default to others(just press Enter button)
+```sh
+[root@cos7box vmware-tools-distrib]# ./vmware-install.pl
+[root@cos7box vmware-tools-distrib]# ./vmware-install.pl
+open-vm-tools are available from the OS vendor and VMware recommends using
+open-vm-tools. See http://kb.vmware.com/kb/2073803 for more information.
+Do you still want to proceed with this legacy installer? [no] yes
+Enjoy,
+--the VMware team
+```
+
+#####Select VM -> Edit Settings and change cdrom to Host Device:
+![Disconnect CDROM](images/unlock-cdrom.png)
+
+#####Add new user vagrant and give password vagrant:
+```sh
+[root@cos7box ~]# useradd -m vagrant
+[root@cos7box ~]# passwd vagrant
+Changing password for user vagrant.
+New password: vagrant
+BAD PASSWORD: The password is shorter than 8 characters
+Retype new password: vagrant
+passwd: all authentication tokens updated successfully.
+```
+
+#####Give full access to vagrant user to use sudo:
+```sh
+[root@cos7box ~]# visudo
+## Allows members of the users group to shutdown this system
+#%users  localhost=/sbin/shutdown -h now
+Defaults:vagrant !requiretty
+vagrant ALL=(ALL) NOPASSWD:ALL
+```
+
+#####Create SSH folder to this user and download vagrant public key to this folder:
+```sh
+[root@cos7box ~]# mkdir -p /home/vagrant/.ssh
+[root@cos7box ~]# curl -k https://raw.githubusercontent.com/mitchellh/vagrant/master/keys/vagrant.pub -o /home/vagrant/.ssh/authorized_keys
+```
+
+#####Set SSH permissions to work without warnings:
+```sh
+[root@cos7box ~]# chmod 0700 /home/vagrant/.ssh
+[root@cos7box ~]# chmod 0600 /home/vagrant/.ssh/authorized_keys
+[root@cos7box ~]# chown -R vagrant:vagrant /home/vagrant/.ssh
+```
+
+#####Shutdown the virtual machine and create template in the vcenter console of this machine:
+```sh
+[root@cos7box ~]# poweroff
+```
+
+#####Right click on the virtual machine select Template and Convert to Template:
+![Convert to Template](images/create-template.png)
+
+
+#Fedora desktop and install and configure vagrant with ansible
+#####Create folder for our Vagrantfile and go this folder:
 ```sh
 [jshahverdiev@cons2 ~]$ mkdir vsphere ; cd vsphere/
 ```
 
-Create temps folder for file syncronization and tasks folder for ansible playbooks:
+#####Create temps folder for file syncronization and tasks folder for ansible playbooks:
 ```sh
 [jshahverdiev@cons2 ~]$ mkdir tasks/; cd temps/
 ```
 
-Create cos7-playbook.yml file with the following content(This file will include install_nginx.yml file from tasks folder to install/configure and start nginx):
+#####Create cos7-playbook.yml file with the following content(This file will include install_nginx.yml file from tasks folder to install/configure and start nginx):
 ```sh
 [jshahverdiev@cons2 vsphere]$ cat cos7-playbook.yml 
 ---
@@ -25,7 +123,7 @@ Create cos7-playbook.yml file with the following content(This file will include 
     - include: 'tasks/install_nginx.yml''
 ```
 
-Create tasks/install_nginx.yml file with the following content:
+#####Create tasks/install_nginx.yml file with the following content:
 ```sh
 [jshahverdiev@cons2 vsphere]$ cat tasks/install_nginx.yml 
 - name: NGINX | Installing NGINX repo rpm
@@ -43,13 +141,13 @@ Create tasks/install_nginx.yml file with the following content:
     state: started 
 ```
 
-Install needed plugins:
+#####Install needed plugins:
 ```sh
 [jshahverdiev@cons2 vsphere]$ vagrant plugin install vagrant-vsphere  
 [jshahverdiev@cons2 vsphere]$ vagrant plugin install vagrant-guests-photon
 ```
 
-Create and add new box for vsphere:
+#####Create and add new box for vsphere:
 ```sh
 [jshahverdiev@cons2 vsphere]$ curl -k https://raw.githubusercontent.com/nsidc/vagrant-vsphere/master/example_box/metadata.json -O
 [jshahverdiev@cons2 vsphere]$ tar cvzf vsphere-dummy.box ./metadata.json 
@@ -61,14 +159,14 @@ Create and add new box for vsphere:
 ==> box: Successfully added box 'vsphere-dummy' (v0) for 'vsphere'!
 ```
 
-Look at box files:
+#####Look at box files:
 ```sh
 [jshahverdiev@cons2 vsphere]$ vagrant box list 
 ub14x64       (virtualbox, 0)
 vsphere-dummy (vsphere, 0)
 ```
 
-Create vagrantfile with the following contents:
+#####Create vagrantfile with the following contents:
 ```sh
 [jshahverdiev@cons2 vsphere]$ cat Vagrantfile 
 # -*- mode: ruby -*-
@@ -110,12 +208,12 @@ Vagrant.configure("2") do |config|
 end  
 ```
 
-Use the following command to start new virtual machine and install nginx to this virtual machine(If you want to debug use the vagrant up --debug command):
+#####Use the following command to start new virtual machine and install nginx to this virtual machine(If you want to debug use the vagrant up --debug command):
 ```sh
 [jshahverdiev@cons2 vsphere]$ vagrant up
 ```
 
-Try to login to the virtual machine:
+#####Try to login to the virtual machine:
 ```sh
 [jshahverdiev@cons2 vsphere]$ vagrant ssh cos7
 ```
