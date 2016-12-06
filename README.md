@@ -3,7 +3,7 @@ Before read this document you must install and configure your Fedora24 desktop w
 This document explain how to install and configure vagrant to use Vmware Vcenter. Firstly we must install and configure our virtual environment. I have 2 ESXI servers worked with clustered storage from FC storage.
 
 ###The configuration of vCenter as following:
-[![N|Solid](file:///home/jshahverdiev/vsphere/images/vcenter-structure.png)](https://nodesource.com/products/nsolid)
+![Vcenter Structure](images/vcenter-structure.png)
 
 Create folder for our Vagrantfile and go this folder:
 ```sh
