@@ -33,7 +33,7 @@
 ```
 #####Install perl and needed packages because vmware-tools will be require:
 ```sh
-[root@cos7box ~]# yum -y install perl net-tools bind-utils
+[root@cos7box ~]# yum -y install perl net-tools bind-utils vim
 ```
 ######Install vmware-tools. In the console of virtual machine select VM -> Guest -> Install/Upgrade Vmware Tools 
 
